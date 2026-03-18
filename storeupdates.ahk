@@ -3,34 +3,56 @@
 #SingleInstance
 
 updateMSStore() {
-    if !WinExist("Microsoft Store"){ 
-            ;;Open the store
+    if !WinExist("Microsoft Store") {
         Run "ms-windows-store://updates"
-            ;;let it start up. Longer?
+        Sleep 7000
+    } else {
+        WinActivate "Microsoft Store"
         Sleep 5000
     }
-    else {
-        WinActivate "Microsoft Store" 
-            ;;let it load the window, it takes a little bit.
-        Sleep 5000
-            ;;select "check updates"
-        Send "{Tab 8}" 
-        Sleep 5000
-            ;;hit the check updates button
-        Send ("{Enter}")
-            ;;wait for it to check for updates
-        Sleep 10000
-            ;;select update all 
-        Send "{Tab 2}"
-        Sleep 1500
-            ;;hit the update all button
-        Send ("{Enter}")
-    }      
+
+    ;; OCR the window
+    result := OCR.FromWindow("Microsoft Store")
+
+    if !result {
+        MsgBox "OCR failed"
+        return
+    }
+
+    ;; Find and click "Check for updates"
+    for line in result.Lines {
+        text := Trim(line.Text)
+
+        if (InStr(text, "Check for updates")) {
+            x := line.X + (line.W // 2)
+            y := line.Y + (line.H // 2)
+
+            Click x, y
+            Sleep 8000 ; wait for scan to finish
+            break
+        }
+    }
+
+    ;; Re-scan for "Update all" (UI changes after check)
+    result := OCR.FromWindow("Microsoft Store")
+
+    for line in result.Lines {
+        text := Trim(line.Text)
+
+        if (InStr(text, "Update all")) {
+            x := line.X + (line.W // 2)
+            y := line.Y + (line.H // 2)
+
+            Click x, y
+            break
+        }
+    }
 }
+
 Run "ms-windows-store://updates"
-Sleep 5000
-SetTimer(updateMSStore, 3000)
+Sleep 7000
 
+SetTimer(updateMSStore, 10000)
 
-Sleep 900000 ; Duration for the loop to run, then exits the script.
-ExitApp 0
+Sleep 900000
+ExitApp
