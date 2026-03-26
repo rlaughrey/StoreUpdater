@@ -62,7 +62,7 @@ getStoreUpdateLogsToFile() {
     DirCreate logDir
 
     ;; Powershell command to save the log to directory. Store/Operational is where the MSApp store stores its logs. apparently. Change the maxevents flag for more or less logs.
-    psCmd := "Get-WinEvent -LogName 'Microsoft-Windows-Store/Operational' -MaxEvents 100 | " .
+    psCmd := "Get-WinEvent -LogName 'Microsoft-Windows-Store/Operational' -MaxEvents 500 | " .
         "Select-Object TimeCreated, Id, LevelDisplayName, Message | " .
         "Format-Table -Wrap | Out-String -Width 4096 | " .
         "Set-Content -Path '" logPath "' -Encoding UTF8"
