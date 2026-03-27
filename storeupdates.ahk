@@ -21,25 +21,30 @@ updateMSStore() {
         return 50
     }
 
+
+
     ;; Find and click "Check for updates"
+    foundCheck := false
     for line in result.Lines {
         text := Trim(line.Text)
 
-        if (InStr(text, "Check for updates")) {
+        if (InStr(text, "Check for updat")) {  ;; more tolerant match, the e can be mistaken for a c by the OCR
             x := line.X + (line.W // 2)
             y := line.Y + (line.H // 2)
 
             Click x, y
-            Sleep 8000 ; wait for scan to finish
+            Sleep 60000
+            foundCheck := true
             break
         }
     }
 
-    ;; Re-scan for "Update all"
-    result := OCR.FromWindow("Microsoft Store")
-
-    if !result
+    ;; If NOT found after scanning everything, will reopen updates page
+    if (!foundCheck) {
+        Run "ms-windows-store://updates"
+        Sleep 7000
         return
+    }
 
     for line in result.Lines {
         text := Trim(line.Text)
